@@ -3,21 +3,59 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
     <title>Odin Tic Tac Toe</title>
+
+    <link rel="stylesheet" href="styles.css">
 </head>
 <body>
     <h1>Odin Tic Tac Toe</h1>
 
-    <div id="grid">
-        <div id="1"></div>
-        <div id="2"></div>
-        <div id="3"></div>
-        <div id="4"></div>
-        <div id="5"></div>
-        <div id="6"></div>
-        <div id="7"></div>
-        <div id="8"></div>
-        <div id="9"></div>
+    <div id="mode-selection-wrapper">
+        <p>Player versus:</p>
+        <select name="mode-select" id="mode-select">
+            <option value="player">Player</option>
+            <option value="computer" selected>Computer</option>
+        </select>
     </div>
+    
+    <div id="board">
+        <div class="grid-space" data-row="0" data-column="0"></div>
+        <div class="grid-space" data-row="0" data-column="1"></div>
+        <div class="grid-space" data-row="0" data-column="2"></div>
+        <div class="grid-space" data-row="1" data-column="0"></div>
+        <div class="grid-space" data-row="1" data-column="1"></div>
+        <div class="grid-space" data-row="1" data-column="2"></div>
+        <div class="grid-space" data-row="2" data-column="0"></div>
+        <div class="grid-space" data-row="2" data-column="1"></div>
+        <div class="grid-space" data-row="2" data-column="2"></div>
+    </div>
+
+    <button id="reset-game-btn">Reset Game</button>
+    
+
+    <dialog id="restart-game-popup">
+        <p>Are you sure you want to restart?</p>
+        <form id="restart-game-form">
+            <div class="dialog-btn-wrapper">
+                <button type="button" class="dialog-btn" id="cancel-restart">No, go back</button>
+                <button type="submit" class="dialog-btn" id="confirm-restart">Yes</button>
+            </div>
+        </form>
+    </dialog>
+
+    <dialog id="winner-popup">
+        <p>That player won!</p>
+        <form id="new-game-form">
+            <p>Would you like to start another game?</p>
+
+            <div class="dialog-btn-wrapper">
+                <button type="button" class="dialog-btn" id="new-game-gtf-out">gtf out</button>
+                <button type="submit" class="dialog-btn" id="new-game-confirm">Yes</button>
+            </div>
+        </form>
+    </dialog>
+    
+    <script src="script.js"></script>
 </body>
 </html>
