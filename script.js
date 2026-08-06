@@ -126,6 +126,11 @@ const gameBoard = function() {
             }
         }
     }
+
+    const clearBoard = () => {
+        board.innerHTML = "";    
+    }
+
     
     return {
         getBoard,
@@ -133,6 +138,7 @@ const gameBoard = function() {
         printBoard,
         resetBoard,
         createMark,
+        clearBoard,
         checkWinner
     }
 }
@@ -142,8 +148,15 @@ const gameController = function() {
     let currentPlayer = 1;
     let gameOver = false;
 
+    const randomGridSpace = () => {
+        return Math.ceil(Math.random() * 3);
+    }
+    
     const playRound = (row, column) => {
         if (gameOver) return;   
+        if (!(row && column)) {
+
+        }
 
         board.createMark(row, column, currentPlayer);
 
@@ -152,8 +165,9 @@ const gameController = function() {
             console.log((currentPlayer === 1 ? "X" : "O") + " won");
             restart();
             gameOver = true;
-            return;
+            return winner;
         } 
+
         currentPlayer = currentPlayer === 1 ? 2 : 1;
     };  
 
@@ -162,11 +176,54 @@ const gameController = function() {
         currentPlayer = 1;
     }
 
+    const getCurrentPlayer = () => currentPlayer;
+    
     return {
         playRound,
         restart,
-        
+        getCurrentPlayer,
+        clearBoard: board.clearBoard
     }
 }
 
-let game = gameController();
+const screenController = () => {
+    // HTML elements
+    const HTMLboard = document.getElementById("board");
+    const restartGameBtn = document.getElementById("reset-game-btn");
+    const restartGameDialog = document.getElementById("reset-game-popup");
+    const confirmRestartGame = document.getElementById("confirm-restart");
+    const cancelRestartGame = document.getElementById("cancel-restart");
+    const winnerDialog = document.getElementById("winner-dialog");
+    const confirmNewGame = document.getElementById("new-game-confirm");
+    const gtfOut = document.getElementById("new-game-gtf-out");
+    
+    const game = gameController();
+
+    const updateScreen = () => {
+        for (let i = 0; i < 3; i++) {
+            for (let j = 0; j < 3; j++) {
+                const gridSpace = document.createElement("div");
+                gridSpace.classList.add("grid-space");
+                gridSpace.dataset.row = i;
+                gridSpace.dataset.column = j;
+                gridSpace.textContent = board[i][j].value;
+                console.log(board[i][j].value);
+                HTMLboard.append(gridSpace);
+                console.log(gridSpace);
+            }
+        }
+    }
+
+    const clickhandler = (e) => {
+        const row = e.target.dataset.row;
+        const column = e.target.dataset.column;
+
+        game.clearBoard();
+        game.playRound(row, column);
+        updateScreen();
+    }
+
+    HTMLboard.addEventListener('click', clickhandler);
+}
+
+screenController();
