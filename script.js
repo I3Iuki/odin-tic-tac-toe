@@ -19,53 +19,6 @@ const cell = function() {
 
 const gameBoard = function() {
     const board = [];
-    const winConditions = [
-    // rows
-    [
-        [0, 0],
-        [0, 1],
-        [0, 2]
-    ],
-    [
-        [1, 0],
-        [1, 1],
-        [1, 2]
-    ],
-    [
-        [2, 0],
-        [2, 1],
-        [2, 2]
-    ],
-    // columns
-    [
-        [0, 0],
-        [1, 0],
-        [2, 0]
-    ],
-    [
-        [0, 1],
-        [1, 1],
-        [2, 1]
-    ],
-    [
-        [0, 2],
-        [1, 2],
-        [2, 2]
-    ],
-    // diagonals
-    [
-        [0, 0],
-        [1, 1],
-        [2, 2]
-    ],
-    [
-        [0, 2],
-        [1, 1],
-        [2, 0]
-    ]
-];  
-
-
 
     for (let i = 0; i < 3; i++) {
         board[i] = [];
@@ -97,75 +50,122 @@ const gameBoard = function() {
     }
 
     const createMark = function(row, column, player) {
-        if (getAvailableCells().includes(`${row}${column}`)) {
-            board[row][column].addMark(player);  
-        } else {
-            console.log("Not an available space.");
-        }
+        board[row][column].addMark(player);  
     }
 
-    const checkWinner = (currentPlayer) => {
-        const currentSymbol = currentPlayer === 1 ? "X" : "O";
-        for (let i = 0; i < 8; i++) {
-            const cur = winConditions[i];
-            if (
-                board[cur[0][0]][cur[0][1]].getValue() === currentSymbol && 
-                board[cur[1][0]][cur[1][1]].getValue() === currentSymbol && 
-                board[cur[2][0]][cur[2][1]].getValue() === currentSymbol
-            ){ return true;}
-        }
-
-        return false;
-        
-    }
-
+    
     const resetBoard = () => {
         for (let i = 0; i < 3; i++) {
             for (let j = 0; j < 3; j++) {
-                board[i][j] = cell()
+                board[i][j] = cell();
             }
         }
     }
 
-    const clearBoard = () => {
-        board.innerHTML = "";    
-    }
-
+    const cellIsAvailable = (row, column) => !!board[row][column].getValue();
     
     return {
         getBoard,
         getAvailableCells,
+        cellIsAvailable,
         printBoard,
         resetBoard,
-        createMark,
-        clearBoard,
-        checkWinner
+        createMark
     }
 }
 
 const gameController = function() {
     const board = gameBoard();
+    const winConditions = [
+        // rows
+        [
+            [0, 0],
+            [0, 1],
+            [0, 2]
+        ],
+        [
+            [1, 0],
+            [1, 1],
+            [1, 2]
+        ],
+        [
+            [2, 0],
+            [2, 1],
+            [2, 2]
+        ],
+        // columns
+        [
+            [0, 0],
+            [1, 0],
+            [2, 0]
+        ],
+        [
+            [0, 1],
+            [1, 1],
+            [2, 1]
+        ],
+        [
+            [0, 2],
+            [1, 2],
+            [2, 2]
+        ],
+        // diagonals
+        [
+            [0, 0],
+            [1, 1],
+            [2, 2]
+        ],
+        [
+            [0, 2],
+            [1, 1],
+            [2, 0]
+        ]
+    ];  
+
+    
     let currentPlayer = 1;
     let gameOver = false;
+
+    
+    const checkWinner = (currentPlayer) => {
+        const currentSymbol = currentPlayer === 1 ? "X" : "O";
+        
+        for (let i = 0; i < 8; i++) {
+            const cur = winConditions[i];
+            if (
+                board.getBoard()[cur[0][0]][cur[0][1]].getValue() === currentSymbol && 
+                board.getBoard()[cur[1][0]][cur[1][1]].getValue() === currentSymbol && 
+                board.getBoard()[cur[2][0]][cur[2][1]].getValue() === currentSymbol
+            ){ return true;}
+        }
+    
+        return false;
+    }
 
     const randomGridSpace = () => {
         return Math.ceil(Math.random() * 3);
     }
     
     const playRound = (row, column) => {
-        if (gameOver) return;   
-        if (!(row && column)) {
-
+        if (gameOver) {
+            restart();
+            return;
         }
-
-        board.createMark(row, column, currentPlayer);
-
-        const winner = board.checkWinner(currentPlayer);
+        
+        if (board.cellIsAvailable(row, column)) {
+            board.createMark(row, column, currentPlayer);
+        } else {
+            const yeah = board.getBoard();
+            console.log(yeah[row][column].getValue());
+            return;
+        }
+        
+        const winner = checkWinner(currentPlayer);
         if (winner) {
             console.log((currentPlayer === 1 ? "X" : "O") + " won");
             restart();
             gameOver = true;
-            return winner;
+            return;
         } 
 
         currentPlayer = currentPlayer === 1 ? 2 : 1;
@@ -178,11 +178,13 @@ const gameController = function() {
 
     const getCurrentPlayer = () => currentPlayer;
     
+    
     return {
         playRound,
         restart,
         getCurrentPlayer,
-        clearBoard: board.clearBoard
+        getBoard: board.getBoard,
+        resetBoard: board.resetBoard
     }
 }
 
@@ -196,34 +198,50 @@ const screenController = () => {
     const winnerDialog = document.getElementById("winner-dialog");
     const confirmNewGame = document.getElementById("new-game-confirm");
     const gtfOut = document.getElementById("new-game-gtf-out");
+    const turnIndicator = document.getElementById("turn-indicator");
     
     const game = gameController();
-
+    
     const updateScreen = () => {
+        const board = game.getBoard();
+
+        HTMLboard.innerHTML = "";
+        
         for (let i = 0; i < 3; i++) {
             for (let j = 0; j < 3; j++) {
                 const gridSpace = document.createElement("div");
                 gridSpace.classList.add("grid-space");
                 gridSpace.dataset.row = i;
                 gridSpace.dataset.column = j;
-                gridSpace.textContent = board[i][j].value;
-                console.log(board[i][j].value);
+                gridSpace.textContent = board[i][j].getValue();
                 HTMLboard.append(gridSpace);
-                console.log(gridSpace);
             }
         }
+        
+        turnIndicator.textContent = game.getCurrentPlayer() === 1 ? "Player 1's turn" : "Player 2's turn";
+        
+        console.log("screen updated");
     }
-
+    
     const clickhandler = (e) => {
         const row = e.target.dataset.row;
         const column = e.target.dataset.column;
-
-        game.clearBoard();
+        
+        game.resetBoard();
         game.playRound(row, column);
         updateScreen();
     }
+    
+    const clearAll = () => {
+
+        HTMLboard.innerHTML = "";    
+        game.resetBoard();
+    }
 
     HTMLboard.addEventListener('click', clickhandler);
+    
+    updateScreen();
+    
 }
 
 screenController();
