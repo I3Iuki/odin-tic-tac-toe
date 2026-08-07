@@ -1,3 +1,13 @@
+const HTMLboard = document.getElementById("board");
+const restartGameBtn = document.getElementById("restart-game-btn");
+const restartGameDialog = document.getElementById("restart-game-popup");
+const confirmRestartGame = document.getElementById("confirm-restart");
+const cancelRestartGame = document.getElementById("cancel-restart");
+const winnerDialog = document.getElementById("winner-popup");
+const confirmNewGame = document.getElementById("new-game-confirm");
+const gtfOut = document.getElementById("new-game-gtf-out");
+const turnIndicator = document.getElementById("turn-indicator");
+
 // this factory function creates the cells
 
 const cell = function() {
@@ -54,7 +64,7 @@ const gameBoard = function() {
     }
 
     
-    const resetBoard = () => {
+    const clearBoard = () => {
         for (let i = 0; i < 3; i++) {
             for (let j = 0; j < 3; j++) {
                 board[i][j] = cell();
@@ -62,14 +72,14 @@ const gameBoard = function() {
         }
     }
 
-    const cellIsAvailable = (row, column) => !!board[row][column].getValue();
+    const cellIsAvailable = (row, column) => board[row][column].getValue() === "";
     
     return {
         getBoard,
         getAvailableCells,
         cellIsAvailable,
         printBoard,
-        resetBoard,
+        clearBoard,
         createMark
     }
 }
@@ -148,23 +158,23 @@ const gameController = function() {
     
     const playRound = (row, column) => {
         if (gameOver) {
-            restart();
             return;
-        }
+        }   
         
         if (board.cellIsAvailable(row, column)) {
             board.createMark(row, column, currentPlayer);
         } else {
             const yeah = board.getBoard();
-            console.log(yeah[row][column].getValue());
+            console.log(row + " " + column + " :" + yeah[row][column].getValue());
             return;
         }
         
         const winner = checkWinner(currentPlayer);
+
         if (winner) {
-            console.log((currentPlayer === 1 ? "X" : "O") + " won");
-            restart();
             gameOver = true;
+            winnerDialog.querySelector("p").textContent = `${currentPlayer === 1 ? "Player 1" : "Player 2"} won!`
+            winnerDialog.showModal();
             return;
         } 
 
@@ -172,33 +182,24 @@ const gameController = function() {
     };  
 
     const restart = () => {
-        board.resetBoard();
+        board.clearBoard();
         currentPlayer = 1;
+        gameOver = false;
     }
 
     const getCurrentPlayer = () => currentPlayer;
-    
-    
+        
     return {
         playRound,
         restart,
         getCurrentPlayer,
         getBoard: board.getBoard,
-        resetBoard: board.resetBoard
+        clearBoard: board.clearBoard
     }
 }
 
 const screenController = () => {
     // HTML elements
-    const HTMLboard = document.getElementById("board");
-    const restartGameBtn = document.getElementById("reset-game-btn");
-    const restartGameDialog = document.getElementById("reset-game-popup");
-    const confirmRestartGame = document.getElementById("confirm-restart");
-    const cancelRestartGame = document.getElementById("cancel-restart");
-    const winnerDialog = document.getElementById("winner-dialog");
-    const confirmNewGame = document.getElementById("new-game-confirm");
-    const gtfOut = document.getElementById("new-game-gtf-out");
-    const turnIndicator = document.getElementById("turn-indicator");
     
     const game = gameController();
     
@@ -223,23 +224,44 @@ const screenController = () => {
         console.log("screen updated");
     }
     
-    const clickhandler = (e) => {
-        const row = e.target.dataset.row;
-        const column = e.target.dataset.column;
-        
-        game.resetBoard();
-        game.playRound(row, column);
+    const clickhandler = (e) => {        
+        game.playRound(e.target.dataset.row, e.target.dataset.column);
         updateScreen();
-    }
-    
-    const clearAll = () => {
-
-        HTMLboard.innerHTML = "";    
-        game.resetBoard();
     }
 
     HTMLboard.addEventListener('click', clickhandler);
     
+    restartGameBtn.addEventListener('click', () => {
+        restartGameDialog.showModal();        
+    });
+
+    confirmRestartGame.addEventListener('click', (e) => {
+        e.preventDefault();
+
+        restartGameDialog.close();
+        game.restart();
+
+        updateScreen();
+    });
+
+    cancelRestartGame.addEventListener('click', (e) => {
+        restartGameDialog.close();
+    });
+    
+    confirmNewGame.addEventListener('click', (e) => {
+        e.preventDefault();
+        
+        winnerDialog.close();
+        game.restart();
+    
+        updateScreen();
+    });
+    
+    gtfOut.addEventListener('click', () => {
+        console.log("close");
+        
+    });
+
     updateScreen();
     
 }
