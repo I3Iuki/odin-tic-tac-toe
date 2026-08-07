@@ -37,7 +37,9 @@
     
 
     <dialog id="restart-game-popup">
-        <p>Are you sure you want to restart?</p>
+        <div>
+            <p>Are you sure you want to restart?</p>
+        </div>
         <form id="restart-game-form">
             <div class="dialog-btn-wrapper">
                 <button type="button" class="dialog-btn" id="cancel-restart">No, go back</button>
@@ -47,10 +49,11 @@
     </dialog>
 
     <dialog id="winner-popup">
-        <p>That player won!</p>
-        <form id="new-game-form">
+        <div>
+            <p>That player won!</p>
             <p>Would you like to start another game?</p>
-
+        </div>
+        <form id="new-game-form">
             <div class="dialog-btn-wrapper">
                 <button type="button" class="dialog-btn" id="new-game-gtf-out">gtf out</button>
                 <button type="submit" class="dialog-btn" id="new-game-confirm">Yes</button>
